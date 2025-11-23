@@ -1,24 +1,50 @@
-import './style.css'
-import typescriptLogo from './typescript.svg'
-import viteLogo from '/vite.svg'
-import { setupCounter } from './counter.ts'
+import * as readline from "node:readline";
+import { argv, stdin, stdout } from "node:process";
+import { crawlPage, getHTML } from "./crawl";
 
-document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
-  <div>
-    <a href="https://vite.dev" target="_blank">
-      <img src="${viteLogo}" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://www.typescriptlang.org/" target="_blank">
-      <img src="${typescriptLogo}" class="logo vanilla" alt="TypeScript logo" />
-    </a>
-    <h1>Vite + TypeScript</h1>
-    <div class="card">
-      <button id="counter" type="button"></button>
-    </div>
-    <p class="read-the-docs">
-      Click on the Vite and TypeScript logos to learn more
-    </p>
-  </div>
-`
+// function askQuestion(query: string): Promise<string> {
+//   const rl = readline.createInterface({
+//     input: stdin,
+//     output: stdout,
+//   });
 
-setupCounter(document.querySelector<HTMLButtonElement>('#counter')!)
+//   return new Promise((resolve) =>
+//     rl.question(query, (ans) => {
+//       rl.close();
+//       resolve(ans);
+//     })
+//   );
+// }
+
+// async function main() {
+//   const args = argv.slice(2);
+
+//   if (args.length == 1) {
+//     console.log(`Starting crawl of ${args[0]}`);
+//     process.exit(0);
+//   }
+
+//   if (args.length > 1) {
+//     console.log("Error: Too many arguments");
+//     process.exit(1);
+//   }
+
+//   const answer = await askQuestion("Enter base URL to crawl: ");
+
+//   if (!answer) {
+//     console.log("Error: No base URL provided");
+//     process.exit(1);
+//   }
+//   console.log(`Starting crawl of ${answer}`);
+//   process.exit(0);
+// }
+
+async function main() {
+  // await getHTML("https://wagslane.dev");
+  const pages = await crawlPage("https://wagslane.dev");
+
+  console.log("\n===== Crawled Pages =====\n");
+  console.log(pages);
+}
+
+main();

@@ -109,3 +109,90 @@ export function extractPageData(
 
   return result;
 }
+
+export async function getHTML(baseURL: string): Promise<string | any> {
+  console.log(`Fetching from ${baseURL}`);
+
+  try {
+    const response = await fetch(baseURL, {
+      headers: {
+        "User-Agent": "BootCrawler/1.0",
+      },
+    });
+
+    if (response.status >= 400) {
+      console.log(`Error: got HTTP code ${response.status}`);
+      return;
+    }
+
+    const contentType = response.headers.get("content-type") || "";
+    if (!contentType.includes("text/html")) {
+      console.log(`Error: non-HTML response , content-type: ${contentType}`);
+      return;
+    }
+
+    const html = await response.text();
+    // console.log("\n[HTML OUTPUT START]\n");
+    // console.log(html);
+    // console.log("\n[HTML OUTPUT END]\n");
+
+    // const data = await response.json();
+    // console.log(data);
+    return html;
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error(`[getHTML] Error while fetching ${baseURL}: ${message}`);
+  }
+}
+
+export async function crawlPage(
+  baseURL: string,
+  currentURL: string = baseURL,
+  pages: Record<string, number> = {}
+): Promise<Record<string, number>> {
+  console.log(`\n[Crawling] ${currentURL}`);
+
+  //Dont crawl from different domain
+
+  try {
+    const base = new URL(baseURL);
+    const curr = new URL(currentURL);
+
+    if (base.hostname !== curr.hostname) {
+      console.log(`Skipping external doamin: ${currentURL}`);
+      return pages;
+    }
+  } catch (error) {
+    console.log(`Invalid URL: ${currentURL}`);
+    return pages;
+  }
+
+  //Normalize URL
+  const normalizedURL = normalizeURL(currentURL);
+
+  //Check if normalizedURL is in pages
+  if (pages[normalizedURL] !== undefined) {
+    pages[normalizedURL]++;
+    return pages;
+  } else pages[normalizedURL] = 1;
+
+  //get HTML
+  const html = await getHTML(currentURL);
+
+  if (!html) {
+    console.log(`No HTML for ${currentURL}`);
+    return pages;
+  }
+
+  //get links
+  const getURLs: string[] = getURLsFromHTML(html, baseURL);
+  console.log("All the links: ");
+  console.log(getURLs);
+
+  //iterate with recursion
+  for (const url of getURLs) {
+    pages = await crawlPage(baseURL, url, pages);
+  }
+
+  return pages;
+}
