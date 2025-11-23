@@ -6,6 +6,7 @@ import {
   getURLsFromHTML,
   getImagesFromHTML,
   extractPageData,
+  crawlSiteAsync,
 } from "../crawl";
 
 const testCase = [
@@ -159,4 +160,46 @@ test("extractPageData basic", () => {
   };
 
   expect(actual).toEqual(expected);
+});
+
+describe("crawlSiteAsync", () => {
+  test("maxConcurrency 3", async () => {
+    const baseURL = "https://wagslane.dev";
+    const pages = await crawlSiteAsync("https://wagslane.dev", 3);
+
+    console.log("\n===== Crawled Pages =====\n");
+    console.log(pages);
+
+    // expect(actual).toEqual(expected);
+  });
+
+  test("maxConcurrency 5", async () => {
+    const baseURL = "https://wagslane.dev";
+    const pages = await crawlSiteAsync("https://wagslane.dev", 5);
+
+    console.log("\n===== Crawled Pages =====\n");
+    console.log(pages);
+
+    // expect(actual).toEqual(expected);
+  });
+
+  test("maxConcurrency 10", async () => {
+    const baseURL = "https://wagslane.dev";
+    const pages = await crawlSiteAsync("https://wagslane.dev", 10);
+
+    console.log("\n===== Crawled Pages =====\n");
+    console.log(pages);
+
+    // expect(actual).toEqual(expected);
+  });
+
+  test("maxConcurrency 1", async () => {
+    const baseURL = "https://wagslane.dev";
+    const pages = await crawlSiteAsync("https://wagslane.dev", 1);
+
+    console.log("\n===== Crawled Pages =====\n");
+    console.log(pages);
+
+    // expect(actual).toEqual(expected);
+  });
 });

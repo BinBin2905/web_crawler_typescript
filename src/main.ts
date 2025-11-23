@@ -1,6 +1,6 @@
 import * as readline from "node:readline";
 import { argv, stdin, stdout } from "node:process";
-import { crawlPage, getHTML } from "./crawl";
+import { crawlPage, crawlSiteAsync, getHTML } from "./crawl";
 
 // function askQuestion(query: string): Promise<string> {
 //   const rl = readline.createInterface({
@@ -41,9 +41,13 @@ import { crawlPage, getHTML } from "./crawl";
 
 async function main() {
   // await getHTML("https://wagslane.dev");
-  const pages = await crawlPage("https://wagslane.dev");
+  // const pages = await crawlPage("https://wagslane.dev");
+
+  // usage: npm run start <URL> <maxPages> <maxConcurrency>
+  const pages = await crawlSiteAsync("https://wagslane.dev", 31, 3);
 
   console.log("\n===== Crawled Pages =====\n");
+  console.log(`Totals pages: ${Object.keys(pages).length}`);
   console.log(pages);
 }
 

@@ -1,4 +1,5 @@
 import { JSDOM } from "jsdom";
+import { ConcurrentCrawler } from "./model/ConcurrentCrawler";
 
 export function normalizeURL(url: string): string {
   try {
@@ -110,7 +111,7 @@ export function extractPageData(
   return result;
 }
 
-export async function getHTML(baseURL: string): Promise<string | any> {
+export async function getHTML(baseURL: string): Promise<string> {
   console.log(`Fetching from ${baseURL}`);
 
   try {
@@ -121,14 +122,14 @@ export async function getHTML(baseURL: string): Promise<string | any> {
     });
 
     if (response.status >= 400) {
-      console.log(`Error: got HTTP code ${response.status}`);
-      return;
+      throw new Error(`Error: got HTTP code ${response.status}`);
     }
 
     const contentType = response.headers.get("content-type") || "";
     if (!contentType.includes("text/html")) {
-      console.log(`Error: non-HTML response , content-type: ${contentType}`);
-      return;
+      throw new Error(
+        `Error: non-HTML response , content-type: ${contentType}`
+      );
     }
 
     const html = await response.text();
@@ -141,7 +142,7 @@ export async function getHTML(baseURL: string): Promise<string | any> {
     return html;
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    console.error(`[getHTML] Error while fetching ${baseURL}: ${message}`);
+    return `[getHTML] Error while fetching ${baseURL}: ${message}`;
   }
 }
 
@@ -195,4 +196,17 @@ export async function crawlPage(
   }
 
   return pages;
+}
+
+export async function crawlSiteAsync(
+  baseURL: string,
+  maxPages: number,
+  maxConcurrency: number = 1
+): Promise<Record<string, number>> {
+  const concurrentCrawler = new ConcurrentCrawler(
+    baseURL,
+    maxPages,
+    maxConcurrency
+  );
+  return await concurrentCrawler.crawl();
 }
