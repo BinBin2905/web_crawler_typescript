@@ -75,12 +75,12 @@ export function getImagesFromHTML(html: string, baseURL: string): string[] {
   return result;
 }
 
-type ExtractedPageData = {
+export type ExtractedPageData = {
   url: string;
   h1?: string;
   first_paragraph?: string;
-  outgoing_links?: string[];
-  image_urls?: string[];
+  outgoing_links: string[];
+  image_urls: string[];
 };
 export function extractPageData(
   html: string,
@@ -209,4 +209,23 @@ export async function crawlSiteAsync(
     maxConcurrency
   );
   return await concurrentCrawler.crawl();
+}
+
+export async function collectPageData(
+  pages: Record<string, number>
+): Promise<Record<string, ExtractedPageData>> {
+  const result: Record<string, ExtractedPageData> = {};
+
+  for (const normalizedUrl of Object.keys(pages)) {
+    // normalized URL không bao gồm protocol, nên phải build lại URL gốc để fetch
+    const fullUrl = "https://" + normalizedUrl; // hoặc giữ từ crawlSiteAsync
+
+    const html = await getHTML(fullUrl);
+    if (!html) continue;
+
+    const pageData = extractPageData(html, fullUrl);
+    result[normalizedUrl] = pageData;
+  }
+
+  return result;
 }
